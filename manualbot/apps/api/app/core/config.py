@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     OPENAI_BASE_URL: str = "https://api.openai.com/v1"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     EMBEDDING_DIMENSIONS: int = 1536
-    CHAT_MODEL: str = "gpt-4o-mini"
+    CHAT_MODEL: str = "gpt-4.1-mini"
     EMBEDDING_PROVIDER: str = "openai"
     CHAT_PROVIDER: str = "openai"
 

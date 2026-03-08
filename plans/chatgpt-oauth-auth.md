@@ -110,9 +110,9 @@ User's OpenAI OAuth Token
 ```
 
 This means:
-- **No API costs for ManualBot** — users pay through their own OpenAI account
+- **No API costs for DocuBot** — users pay through their own OpenAI account
 - **Users get their own rate limits** — based on their OpenAI tier
-- **Model access matches their plan** — GPT-4o if they have Plus, etc.
+- **Model access matches their plan** — gpt-4.1 or gpt-5.2 depending on their tier
 
 ### 3. Fallback: Manual API Key
 

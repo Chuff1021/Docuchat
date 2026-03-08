@@ -346,7 +346,7 @@ export default function BotSettingsPage() {
 
             <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
               <p className="text-xs text-slate-500 mb-1">
-                <span className="text-slate-400 font-medium">Model:</span> gpt-4o-mini
+                <span className="text-slate-400 font-medium">Model:</span> gpt-4.1-mini
               </p>
               <p className="text-xs text-slate-500">
                 <span className="text-slate-400 font-medium">Embeddings:</span> text-embedding-3-small

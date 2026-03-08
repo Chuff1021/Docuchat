@@ -118,7 +118,7 @@ export const botsApi = {
       fallback_message: null,
       system_prompt: null,
       is_active: true,
-      chat_model: "gpt-4o-mini",
+      chat_model: "gpt-4.1-mini",
       temperature: 0.3,
       max_tokens: 1024,
       citation_mode: data.citation_mode ?? true,

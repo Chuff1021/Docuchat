@@ -32,7 +32,7 @@ flowchart TB
     subgraph Ingestion Pipeline
         Downloader[URL Downloader - httpx]
         PDFParser[PDF Text Extractor - pypdf]
-        VisionExtractor[Diagram/Image Extractor - pdf2image + GPT-4o Vision]
+        VisionExtractor[Diagram/Image Extractor - pdf2image + gpt-4.1 Vision]
         Chunker[Smart Chunker - text + image descriptions]
         Embedder[Embedding Generator - text-embedding-3-small]
     end
@@ -48,7 +48,7 @@ flowchart TB
         VectorSearch[Vector Retrieval - Qdrant]
         WebSearch[AI Web Search - Tavily/SearXNG]
         ContextBuilder[Context Builder - docs + images + web]
-        LLM[LLM - GPT-4o]
+        LLM[LLM - gpt-4.1]
         CitationGen[Citation Generator]
     end
 
@@ -104,7 +104,7 @@ Everything else happens automatically — extraction, chunking, embedding, index
 Technical manuals are full of diagrams, schematics, wiring diagrams, and tables that `pypdf` text extraction misses entirely. The solution:
 
 1. Convert each PDF page to an image using `pdf2image` (uses `poppler`)
-2. Send pages that likely contain diagrams to **GPT-4o Vision** with a prompt like:
+2. Send pages that likely contain diagrams to **gpt-4.1 Vision** with a prompt like:
    > "Describe this technical diagram in detail. Include all labels, measurements, part numbers, connections, and relationships shown."
 3. Store the image description as a chunk alongside the text chunks
 4. This means when someone asks "What's the wiring diagram for X?", the vector search finds the image description and the LLM can answer accurately
@@ -138,7 +138,7 @@ flowchart LR
     VS --> CB[Context Builder]
     Web --> CB
     Skip --> CB
-    CB --> LLM[GPT-4o with expert prompt]
+    CB --> LLM[gpt-4.1 with expert prompt]
     LLM --> A[Answer with citations]
 ```
 
@@ -195,7 +195,7 @@ The current pipeline only extracts text. The enhanced pipeline adds:
   - Text on page < 100 words → likely a diagram page
   - Page contains "figure", "fig.", "diagram", "schematic", "table" → likely has visual content
   - Always process if page has both text and images (mixed content)
-- Send detected pages to GPT-4o Vision API:
+- Send detected pages to gpt-4.1 Vision API:
   ```
   "Analyze this page from a technical manual. Describe ALL visual elements in detail:
    - Diagrams: describe connections, flow, components
@@ -307,7 +307,7 @@ RUN apt-get update && apt-get install -y poppler-utils
 New settings in [`config.py`](manualbot/apps/api/app/core/config.py):
 ```python
 # Vision extraction
-VISION_MODEL: str = "gpt-4o"
+VISION_MODEL: str = "gpt-4.1"
 ENABLE_VISION_EXTRACTION: bool = True
 VISION_MIN_TEXT_THRESHOLD: int = 100  # words - below this, page likely has diagrams
 
@@ -417,7 +417,7 @@ ALTER TABLE chat_messages ADD COLUMN web_sources JSON;
 
 | Risk | Mitigation |
 |------|------------|
-| GPT-4o Vision costs for large manuals | Only process pages detected as diagrams, cache results |
+| gpt-4.1 Vision costs for large manuals | Only process pages detected as diagrams, cache results |
 | URL downloads could be slow/fail | Timeout limits, retry logic, async download |
 | Web search could return irrelevant results | Confidence threshold, clear labeling, user toggle |
 | Poppler system dependency | Add to Dockerfile, document in README |

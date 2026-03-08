@@ -501,7 +501,7 @@ export default function LandingPage() {
                 {[
                   { label: "Query Planner", sub: "Optimizes questions" },
                   { label: "Context Builder", sub: "Assembles evidence" },
-                  { label: "GPT-4o", sub: "Generates answer" },
+                  { label: "GPT-4.1", sub: "Generates answer" },
                   { label: "Citations", sub: "Page-level sources" },
                 ].map(({ label, sub }) => (
                   <div
@@ -549,7 +549,7 @@ export default function LandingPage() {
             <FeatureCard
               icon={Eye}
               title="Vision AI for Diagrams"
-              description="GPT-4o Vision reads diagrams, flowcharts, and tables that text extraction misses. Your bot understands visual content."
+              description="GPT-4.1 Vision reads diagrams, flowcharts, and tables that text extraction misses. Your bot understands visual content."
               iconColor="bg-purple-500/15 text-purple-400"
             />
             <FeatureCard

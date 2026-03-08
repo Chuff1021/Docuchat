@@ -38,7 +38,7 @@ DocuBot's brain is a **Retrieval-Augmented Generation (RAG)** system with three 
 │  ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐ │
 │  │ PDF     │  │ Text     │  │ Vision   │  │ Smart   │ │
 │  │ Upload  │→ │ Extract  │→ │ Extract  │→ │ Chunk   │ │
-│  │ + URLs  │  │ (pypdf)  │  │ (GPT-4o) │  │ + Embed │ │
+│  │ + URLs  │  │ (pypdf)  │  │(gpt-4.1)│  │ + Embed │ │
 │  └─────────┘  └──────────┘  └──────────┘  └─────────┘ │
 │                                    ↓                    │
 │  Layer 2: KNOWLEDGE STORE                               │
@@ -103,7 +103,7 @@ Technical documents are full of diagrams, tables, flowcharts, and images that te
    - Pages with < 100 words of text (probably a diagram/image page)
    - Pages containing keywords: "figure", "diagram", "table", "schematic"
    - Pages with mixed text + images
-3. Send detected pages to **GPT-4o Vision** with this prompt:
+3. Send detected pages to **gpt-4.1 Vision** with this prompt:
 
 ```
 "Analyze this page from a business document. Describe ALL visual elements:
@@ -293,7 +293,7 @@ Context Builder assembles:
 
 ### Step 5: LLM Answer Generation
 
-The assembled context + the user's question are sent to GPT-4o with a carefully crafted system prompt.
+The assembled context + the user's question are sent to gpt-4.1 with a carefully crafted system prompt.
 
 **The Expert System Prompt:**
 
@@ -349,7 +349,7 @@ Final Response:
 When a user connects their OpenAI (ChatGPT) account via OAuth, DocuBot gains:
 
 1. **Zero API cost for the platform** — the user's own OpenAI account handles API calls
-2. **Access to the user's model tier** — GPT-4o if they have Plus, etc.
+2. **Access to the user's model tier** — gpt-4.1 or gpt-5.2 depending on their plan
 3. **Web search capability** — augment document answers with live web data
 
 ### The Search Engine Architecture
@@ -385,7 +385,7 @@ When a user connects their OpenAI (ChatGPT) account via OAuth, DocuBot gains:
 │  └────────────────┼───────────────────┘                │
 │                   ↓                                     │
 │  ┌──────────────────────────────┐                       │
-│  │  ANSWER GENERATOR (GPT-4o)  │                       │
+│  │  ANSWER GENERATOR (gpt-4.1) │                       │
 │  │  via User's OAuth Token     │                       │
 │  └──────────────┬───────────────┘                       │
 │                 ↓                                       │
@@ -425,7 +425,7 @@ def search(query, bot_config, user_token):
     answer = generate_answer(
         query=query,
         context=context,
-        model="gpt-4o",
+        model="gpt-4.1",
         api_token=resolve_token(user_token, bot_config)
     )
     
@@ -552,9 +552,9 @@ DAILY USAGE:
 | Metadata DB | PostgreSQL | Users, bots, docs, analytics |
 | Task Queue | Celery + Redis | Async document processing |
 | PDF Text | pypdf | Text extraction |
-| PDF Vision | pdf2image + GPT-4o Vision | Diagram/image understanding |
+| PDF Vision | pdf2image + gpt-4.1 Vision | Diagram/image understanding |
 | Embeddings | text-embedding-3-small | Vector generation |
-| LLM | GPT-4o (via user's OAuth) | Answer generation |
+| LLM | gpt-4.1 (via user's OAuth) | Answer generation |
 | Web Search | Tavily API | Augmented search |
 | Auth | JWT + OpenAI OAuth | User authentication |
 | File Storage | Local / S3 | PDF storage |
