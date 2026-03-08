@@ -1,5 +1,5 @@
 /**
- * API client for ManualBot
+ * API client for DocuBot
  * Uses mock data for demo preview (no backend required)
  */
 

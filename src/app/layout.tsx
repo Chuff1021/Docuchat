@@ -5,10 +5,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "ManualBot — AI Chatbot for Your Documentation",
+  title: "DocuBot — Your Business Knowledge, Instantly Accessible",
   description:
-    "Upload your manuals and documentation, create an AI chatbot, and embed it on your website in minutes.",
-  keywords: ["AI chatbot", "documentation", "customer support", "RAG", "knowledge base"],
+    "Upload your docs, get an AI expert that answers questions for your team and customers. One-shot answers with citations, embeddable chat widget, zero AI costs.",
+  keywords: ["AI chatbot", "documentation", "customer support", "RAG", "knowledge base", "business chatbot", "document AI"],
 };
 
 export default function RootLayout({

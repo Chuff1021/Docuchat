@@ -52,7 +52,7 @@ export default function RegisterPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 transition-shadow">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">ManualBot</span>
+            <span className="text-xl font-bold text-white">DocuBot</span>
           </Link>
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
           <p className="text-slate-400 mt-1 text-sm">Start building AI chatbots from your docs</p>

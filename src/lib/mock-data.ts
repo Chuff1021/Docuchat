@@ -1,5 +1,5 @@
 /**
- * Mock data for ManualBot demo preview
+ * Mock data for DocuBot demo preview
  * Used when no backend API is available
  */
 
@@ -16,7 +16,7 @@ import type {
 
 export const DEMO_USER: User = {
   id: "usr_demo_001",
-  email: "demo@manualbot.ai",
+  email: "demo@docubot.ai",
   full_name: "Alex Chen",
   is_active: true,
   is_verified: true,
@@ -293,7 +293,7 @@ const CHAT_RESPONSES: Record<string, { answer: string; citations: Citation[]; an
     answer_found: true,
   },
   "what are the main features": {
-    answer: "ManualBot offers several key features:\n\n1. **Document Upload** — Upload PDFs to create a knowledge base\n2. **AI Chat** — GPT-powered chatbot that answers from your docs\n3. **Citations** — Every answer includes source references\n4. **Embed Widget** — Add the chatbot to any website with a code snippet\n5. **Analytics** — Track usage, top questions, and resolution rates\n6. **Lead Capture** — Collect visitor information during chats\n7. **Domain Restrictions** — Control where your widget can be embedded",
+    answer: "DocuBot offers several key features:\n\n1. **Document Upload** — Upload PDFs to create a knowledge base\n2. **AI Chat** — GPT-powered chatbot that answers from your docs\n3. **Citations** — Every answer includes source references\n4. **Embed Widget** — Add the chatbot to any website with a code snippet\n5. **Analytics** — Track usage, top questions, and resolution rates\n6. **Lead Capture** — Collect visitor information during chats\n7. **Domain Restrictions** — Control where your widget can be embedded",
     citations: [DEMO_CITATIONS[0]],
     answer_found: true,
   },
@@ -303,7 +303,7 @@ const CHAT_RESPONSES: Record<string, { answer: string; citations: Citation[]; an
     answer_found: true,
   },
   "what are the system requirements": {
-    answer: "ManualBot is a cloud-based platform, so there are minimal system requirements:\n\n- **Browser**: Chrome, Firefox, Safari, or Edge (latest versions)\n- **Documents**: PDF format, up to 50MB per file\n- **Widget**: Works on any website that supports JavaScript\n- **API**: RESTful API accessible from any programming language\n\nNo server-side installation is required.",
+    answer: "DocuBot is a cloud-based platform, so there are minimal system requirements:\n\n- **Browser**: Chrome, Firefox, Safari, or Edge (latest versions)\n- **Documents**: PDF format, up to 50MB per file\n- **Widget**: Works on any website that supports JavaScript\n- **API**: RESTful API accessible from any programming language\n\nNo server-side installation is required.",
     citations: [DEMO_CITATIONS[1]],
     answer_found: true,
   },

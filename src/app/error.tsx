@@ -19,9 +19,9 @@ export default function Error({
       <div className="text-center">
         <div className="inline-flex items-center gap-2 mb-8">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">M</span>
+            <span className="text-white font-bold text-sm">D</span>
           </div>
-          <span className="text-xl font-semibold text-stone-900">ManualBot</span>
+          <span className="text-xl font-semibold text-stone-900">DocuBot</span>
         </div>
         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <span className="text-red-500 text-2xl">⚠</span>

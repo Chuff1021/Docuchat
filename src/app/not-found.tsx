@@ -6,9 +6,9 @@ export default function NotFound() {
       <div className="text-center">
         <div className="inline-flex items-center gap-2 mb-8">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">M</span>
+            <span className="text-white font-bold text-sm">D</span>
           </div>
-          <span className="text-xl font-semibold text-stone-900">ManualBot</span>
+          <span className="text-xl font-semibold text-stone-900">DocuBot</span>
         </div>
         <h1 className="text-6xl font-bold text-stone-900 mb-4">404</h1>
         <p className="text-xl text-stone-600 mb-2">Page not found</p>

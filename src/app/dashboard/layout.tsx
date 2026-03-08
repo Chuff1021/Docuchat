@@ -93,11 +93,11 @@ export default function DashboardLayout({
         {/* Logo */}
         <div className="px-5 py-5 border-b border-slate-800/60">
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 transition-shadow">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/25 group-hover:shadow-blue-600/40 transition-shadow">
               <Zap className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
-              <span className="font-bold text-white text-base tracking-tight">ManualBot</span>
+              <span className="font-bold text-white text-base tracking-tight">DocuBot</span>
               <div className="flex items-center gap-1 mt-0.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 status-online" />
                 <span className="text-xs text-slate-400">AI Platform</span>

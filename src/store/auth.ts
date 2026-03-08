@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
         }),
     }),
     {
-      name: "manualbot-auth",
+      name: "docubot-auth",
       partialize: (state) => ({
         user: state.user,
         organization: state.organization,

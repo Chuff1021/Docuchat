@@ -108,7 +108,7 @@ export default function EmbedPage() {
   const activeToken = tokens.find((t) => t.is_active);
 
   const htmlSnippet = activeToken
-    ? `<!-- ManualBot Widget -->
+    ? `<!-- DocuBot Widget -->
 <script
   src="${WIDGET_CDN}/widget.js"
   data-bot="${activeToken.token}"
@@ -117,14 +117,14 @@ export default function EmbedPage() {
     : `<!-- Create a widget token first to get your embed code -->`;
 
   const reactSnippet = activeToken
-    ? `// Install: npm install @manualbot/widget
-import { ManualBotWidget } from '@manualbot/widget';
+    ? `// Install: npm install @docubot/widget
+import { DocuBotWidget } from '@docubot/widget';
 
 export default function App() {
   return (
     <>
       {/* Your app content */}
-      <ManualBotWidget
+      <DocuBotWidget
         token="${activeToken.token}"
         position="bottom-right"
       />
