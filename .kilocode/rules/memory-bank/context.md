@@ -24,6 +24,7 @@ ManualBot is an AI-powered documentation chatbot platform. The frontend is fully
 - [x] Built marketing landing page at / with hero, features, how-it-works, pricing, CTA
 - [x] Chat page returns intelligent mock responses with citations
 - [x] Bot creation, deletion, document upload all work with in-memory state
+- [x] Added backend architecture plan (plans/backend-architecture.md) for enhanced ingestion, vision extraction, web search, and chat engine
 
 ## Current Structure
 
