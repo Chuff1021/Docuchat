@@ -17,20 +17,44 @@ import {
   Clock,
   Loader2,
   AlertCircle,
+  Zap,
+  Database,
 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 
 function StatusBadge({ status }: { status: Document["status"] }) {
   const map = {
-    pending: { icon: Clock, label: "Pending", cls: "text-amber-600 bg-amber-50" },
-    processing: { icon: Loader2, label: "Processing", cls: "text-blue-600 bg-blue-50" },
-    completed: { icon: CheckCircle2, label: "Indexed", cls: "text-green-600 bg-green-50" },
-    failed: { icon: XCircle, label: "Failed", cls: "text-red-600 bg-red-50" },
-    deleted: { icon: XCircle, label: "Deleted", cls: "text-stone-400 bg-stone-50" },
+    pending: {
+      icon: Clock,
+      label: "Pending",
+      cls: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    },
+    processing: {
+      icon: Loader2,
+      label: "Processing",
+      cls: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    },
+    completed: {
+      icon: CheckCircle2,
+      label: "Indexed",
+      cls: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    },
+    failed: {
+      icon: XCircle,
+      label: "Failed",
+      cls: "text-red-400 bg-red-500/10 border-red-500/20",
+    },
+    deleted: {
+      icon: XCircle,
+      label: "Deleted",
+      cls: "text-slate-500 bg-slate-800 border-slate-700",
+    },
   };
   const { icon: Icon, label, cls } = map[status] || map.pending;
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${cls}`}
+    >
       <Icon className={`w-3 h-3 ${status === "processing" ? "animate-spin" : ""}`} />
       {label}
     </span>
@@ -52,6 +76,7 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState<string[]>([]);
 
   const loadDocuments = useCallback(async () => {
     if (!organization || !accessToken) return;
@@ -67,7 +92,6 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     loadDocuments();
-    // Poll for status updates
     const interval = setInterval(loadDocuments, 5000);
     return () => clearInterval(interval);
   }, [loadDocuments]);
@@ -77,16 +101,29 @@ export default function DocumentsPage() {
       if (!organization || !accessToken) return;
       setUploadError("");
       setUploading(true);
+      setUploadProgress([]);
 
       for (const file of acceptedFiles) {
+        setUploadProgress((prev) => [...prev, `Uploading ${file.name}...`]);
         try {
           const doc = await documentsApi.upload(organization.id, botId, file, accessToken);
           setDocuments((prev) => [doc, ...prev]);
+          setUploadProgress((prev) =>
+            prev.map((p) =>
+              p.includes(file.name) ? `✓ ${file.name} uploaded` : p
+            )
+          );
         } catch (err: unknown) {
           setUploadError(err instanceof Error ? err.message : "Upload failed");
+          setUploadProgress((prev) =>
+            prev.map((p) =>
+              p.includes(file.name) ? `✗ ${file.name} failed` : p
+            )
+          );
         }
       }
       setUploading(false);
+      setTimeout(() => setUploadProgress([]), 3000);
     },
     [organization, accessToken, botId]
   );
@@ -118,59 +155,140 @@ export default function DocumentsPage() {
     }
   };
 
+  const totalChunks = documents.reduce((sum, d) => sum + (d.chunk_count || 0), 0);
+  const indexedCount = documents.filter((d) => d.status === "completed").length;
+
   return (
-    <div className="p-8">
+    <div className="p-6 lg:p-8 space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-stone-400 mb-6">
-        <Link href="/dashboard/bots" className="hover:text-stone-600">Bots</Link>
-        <ChevronRight className="w-3 h-3" />
-        <Link href={`/dashboard/bots/${botId}`} className="hover:text-stone-600">Bot</Link>
-        <ChevronRight className="w-3 h-3" />
-        <span className="text-stone-700">Documents</span>
+      <div className="flex items-center gap-2 text-sm text-slate-500">
+        <Link href="/dashboard/bots" className="hover:text-slate-300 transition-colors">
+          Bots
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" />
+        <Link href={`/dashboard/bots/${botId}`} className="hover:text-slate-300 transition-colors">
+          Bot
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" />
+        <span className="text-slate-300 font-medium">Documents</span>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Documents</h1>
-          <p className="text-stone-500 mt-0.5">Upload PDFs to train your bot</p>
+          <div className="flex items-center gap-2 mb-1">
+            <FileText className="w-4 h-4 text-blue-400" />
+            <span className="text-sm text-blue-400 font-medium">Knowledge Base</span>
+          </div>
+          <h1 className="text-2xl font-bold text-white">Documents</h1>
+          <p className="text-slate-400 mt-1 text-sm">Upload PDFs to train your bot</p>
         </div>
         <button
           onClick={loadDocuments}
-          className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 border border-stone-200 px-3 py-2 rounded-lg hover:bg-stone-50 transition-colors"
+          className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 px-3 py-2 rounded-xl transition-all"
         >
           <RefreshCw className="w-4 h-4" />
           Refresh
         </button>
       </div>
 
+      {/* Stats row */}
+      {documents.length > 0 && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-slate-900 border border-slate-800/60 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-white">{documents.length}</p>
+              <p className="text-xs text-slate-500">Total files</p>
+            </div>
+          </div>
+          <div className="bg-slate-900 border border-slate-800/60 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-white">{indexedCount}</p>
+              <p className="text-xs text-slate-500">Indexed</p>
+            </div>
+          </div>
+          <div className="bg-slate-900 border border-slate-800/60 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+              <Database className="w-4 h-4 text-violet-400" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-white">{totalChunks.toLocaleString()}</p>
+              <p className="text-xs text-slate-500">Vector chunks</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Upload zone */}
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors mb-6 ${
+        className={`relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all overflow-hidden ${
           isDragActive
-            ? "border-indigo-400 bg-indigo-50"
-            : "border-stone-200 hover:border-stone-300 bg-white"
+            ? "border-indigo-500/60 bg-indigo-500/5"
+            : "border-slate-700/60 hover:border-slate-600/60 bg-slate-900/40 hover:bg-slate-900/60"
         }`}
       >
         <input {...getInputProps()} />
+
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: "radial-gradient(circle at 1px 1px, rgba(99,102,241,0.5) 1px, transparent 0)",
+            backgroundSize: "24px 24px",
+          }} />
+        </div>
+
         {uploading ? (
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-            <p className="text-sm text-stone-600">Uploading...</p>
+          <div className="relative flex flex-col items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <Loader2 className="w-7 h-7 text-indigo-400 animate-spin" />
+            </div>
+            <p className="text-sm font-semibold text-slate-300">Uploading files...</p>
+            {uploadProgress.map((msg, i) => (
+              <p key={i} className="text-xs text-slate-500">{msg}</p>
+            ))}
+          </div>
+        ) : isDragActive ? (
+          <div className="relative flex flex-col items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center">
+              <Upload className="w-7 h-7 text-indigo-400" />
+            </div>
+            <p className="text-base font-bold text-indigo-300">Drop PDFs here</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2">
-            <Upload className="w-8 h-8 text-stone-400" />
-            <p className="text-sm font-medium text-stone-700">
-              {isDragActive ? "Drop PDFs here" : "Drag & drop PDFs here"}
-            </p>
-            <p className="text-xs text-stone-400">or click to browse · Max 50MB per file</p>
+          <div className="relative flex flex-col items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
+              <Upload className="w-7 h-7 text-slate-400" />
+            </div>
+            <div>
+              <p className="text-base font-bold text-slate-300">
+                Drag & drop PDFs here
+              </p>
+              <p className="text-sm text-slate-500 mt-1">
+                or <span className="text-indigo-400 hover:text-indigo-300">click to browse</span>
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-slate-600 mt-1">
+              <span className="flex items-center gap-1">
+                <Zap className="w-3 h-3" /> Auto-indexed with AI
+              </span>
+              <span>·</span>
+              <span>Max 50MB per file</span>
+              <span>·</span>
+              <span>PDF only</span>
+            </div>
           </div>
         )}
       </div>
 
       {uploadError && (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-4">
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {uploadError}
         </div>
@@ -180,95 +298,116 @@ export default function DocumentsPage() {
       {loading ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 bg-stone-200 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-slate-800 rounded-xl animate-pulse" />
           ))}
         </div>
       ) : documents.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-stone-200">
-          <FileText className="w-10 h-10 text-stone-300 mx-auto mb-2" />
-          <p className="text-stone-500 text-sm">No documents uploaded yet</p>
-          <p className="text-stone-400 text-xs mt-1">Upload PDFs above to get started</p>
+        <div className="text-center py-12 bg-slate-900 rounded-2xl border border-slate-800/60">
+          <div className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mx-auto mb-3">
+            <FileText className="w-7 h-7 text-slate-600" />
+          </div>
+          <p className="text-slate-400 font-medium">No documents uploaded yet</p>
+          <p className="text-slate-500 text-sm mt-1">Upload PDFs above to train your bot</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-stone-100">
-                <th className="text-left text-xs font-medium text-stone-400 uppercase tracking-wider px-5 py-3">
-                  File
-                </th>
-                <th className="text-left text-xs font-medium text-stone-400 uppercase tracking-wider px-5 py-3">
-                  Status
-                </th>
-                <th className="text-left text-xs font-medium text-stone-400 uppercase tracking-wider px-5 py-3">
-                  Pages
-                </th>
-                <th className="text-left text-xs font-medium text-stone-400 uppercase tracking-wider px-5 py-3">
-                  Chunks
-                </th>
-                <th className="text-left text-xs font-medium text-stone-400 uppercase tracking-wider px-5 py-3">
-                  Size
-                </th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {documents.map((doc) => (
-                <tr key={doc.id} className="hover:bg-stone-50 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <FileText className="w-4 h-4 text-stone-400 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-stone-800 truncate max-w-xs">
-                          {doc.original_file_name}
-                        </p>
-                        <p className="text-xs text-stone-400">
-                          {new Date(doc.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <StatusBadge status={doc.status} />
-                    {doc.error_message && (
-                      <p className="text-xs text-red-500 mt-1 max-w-xs truncate">
-                        {doc.error_message}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 text-sm text-stone-600">
-                    {doc.page_count ?? "—"}
-                  </td>
-                  <td className="px-5 py-3.5 text-sm text-stone-600">
-                    {doc.chunk_count ?? "—"}
-                  </td>
-                  <td className="px-5 py-3.5 text-sm text-stone-600">
-                    {formatBytes(doc.file_size)}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2 justify-end">
-                      {(doc.status === "failed" || doc.status === "completed") && (
-                        <button
-                          onClick={() => handleReprocess(doc.id)}
-                          className="text-stone-400 hover:text-indigo-600 transition-colors p-1"
-                          title="Reprocess"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDelete(doc.id)}
-                        className="text-stone-400 hover:text-red-500 transition-colors p-1"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        <div className="bg-slate-900 rounded-2xl border border-slate-800/60 overflow-hidden">
+          <div className="px-5 py-3 border-b border-slate-800/60 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-300">
+              {documents.length} document{documents.length !== 1 ? "s" : ""}
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-800/60">
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
+                    File
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
+                    Status
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
+                    Pages
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
+                    Chunks
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
+                    Size
+                  </th>
+                  <th className="px-5 py-3" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {documents.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-slate-800/30 transition-colors group">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-200 truncate max-w-xs">
+                            {doc.original_file_name}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {new Date(doc.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <StatusBadge status={doc.status} />
+                      {doc.error_message && (
+                        <p className="text-xs text-red-400 mt-1 max-w-xs truncate">
+                          {doc.error_message}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-sm font-medium text-slate-300">
+                        {doc.page_count ?? "—"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-sm font-medium text-slate-300">
+                        {doc.chunk_count?.toLocaleString() ?? "—"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-sm text-slate-400">
+                        {formatBytes(doc.file_size)}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1.5 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                        {(doc.status === "failed" || doc.status === "completed") && (
+                          <button
+                            onClick={() => handleReprocess(doc.id)}
+                            className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-indigo-500/10 border border-slate-700 hover:border-indigo-500/30 flex items-center justify-center text-slate-500 hover:text-indigo-400 transition-all"
+                            title="Reprocess"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(doc.id)}
+                          className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-red-500/10 border border-slate-700 hover:border-red-500/30 flex items-center justify-center text-slate-500 hover:text-red-400 transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
