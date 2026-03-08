@@ -4,10 +4,13 @@
   "description": "ManualBot embeddable chat widget",
   "main": "dist/widget.js",
   "types": "dist/widget.d.ts",
+  "files": ["dist"],
   "scripts": {
-    "build": "esbuild src/widget.ts --bundle --minify --outfile=dist/widget.js --format=iife --global-name=ManualBot",
-    "build:dev": "esbuild src/widget.ts --bundle --outfile=dist/widget.js --format=iife --global-name=ManualBot --sourcemap",
-    "watch": "esbuild src/widget.ts --bundle --outfile=dist/widget.js --format=iife --global-name=ManualBot --watch"
+    "build": "node build.js",
+    "build:dev": "node build.js --watch",
+    "watch": "node build.js --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
