@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User, Organization } from "@/types";
+import { DEMO_USER, DEMO_ORGANIZATION } from "@/lib/mock-data";
 
 interface AuthState {
   user: User | null;
@@ -23,11 +24,12 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user: null,
-      organization: null,
-      accessToken: null,
-      refreshToken: null,
-      isAuthenticated: false,
+      // Auto-login with demo user for preview
+      user: DEMO_USER,
+      organization: DEMO_ORGANIZATION,
+      accessToken: "demo_access_token",
+      refreshToken: "demo_refresh_token",
+      isAuthenticated: true,
 
       setAuth: (user, org, accessToken, refreshToken) =>
         set({
