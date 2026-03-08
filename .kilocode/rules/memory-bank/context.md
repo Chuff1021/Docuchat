@@ -14,6 +14,10 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] ESLint configuration
 - [x] Memory bank documentation
 - [x] Recipe system for common features
+- [x] Built ManualBot full-stack SaaS in manualbot/ directory
+- [x] Ported ManualBot frontend to root app (src/) for preview on port 3000
+- [x] Installed zustand, lucide-react, react-dropzone, date-fns
+- [x] All pages: dashboard, bots, bot detail, documents, chat, embed, settings, analytics, auth
 
 ## Current Structure
 
@@ -86,3 +90,4 @@ export async function GET() {
 |------|---------|
 | Initial | Template created with base setup |
 | 2026-03-08 | Built out ManualBot full-stack SaaS application in `manualbot/` directory |
+| 2026-03-08 | Ported ManualBot frontend to root app for port 3000 preview |
