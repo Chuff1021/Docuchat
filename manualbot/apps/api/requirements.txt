@@ -1,0 +1,45 @@
+# FastAPI and ASGI
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+psycopg2-binary==2.9.10
+
+# Pydantic
+pydantic==2.10.3
+pydantic-settings==2.7.0
+pydantic[email]==2.10.3
+
+# Auth
+python-jose[cryptography]==3.3.0
+bcrypt==4.2.1
+passlib[bcrypt]==1.7.4
+
+# Celery + Redis
+celery==5.4.0
+redis==5.2.1
+kombu==5.4.2
+
+# AI / Embeddings
+openai==1.58.1
+qdrant-client==1.12.1
+
+# PDF Processing
+pypdf==5.1.0
+
+# Storage
+aiofiles==24.1.0
+boto3==1.35.93  # For S3 support
+
+# Logging
+structlog==24.4.0
+
+# HTTP
+httpx==0.28.1
+
+# Utilities
+python-dotenv==1.0.1
