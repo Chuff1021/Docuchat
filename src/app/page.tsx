@@ -183,11 +183,15 @@ export default function LandingPage() {
 
         <div className="max-w-3xl mx-auto text-center relative">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-8">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-3">
             <Sparkles className="w-3.5 h-3.5 text-blue-400" />
             <span className="text-xs font-semibold text-blue-300">
               AI-Powered Business Chatbot
             </span>
+          </div>
+
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-300">
+            Live demo update: auto-shipped from Kilo Builder → GitHub → Vercel
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-[1.1]">
