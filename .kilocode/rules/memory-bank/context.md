@@ -46,6 +46,7 @@ DocuBot is an AI-powered business chatbot platform. The frontend now talks to re
 - [x] Added batch manual URL import API endpoint (`/api/v1/organizations/[orgId]/bots/[botId]/documents/import-urls`) and frontend client wiring
 - [x] Extended Documents into initial Manual Library behavior: upload + URL import actions and source-type labeling
 - [x] Added architecture plan for full V1 wizard + manual library + approved-source crawling (`plans/new-bot-wizard-manual-library-v1.md`)
+- [x] Added deploy-safe environment fallback for missing DB config and restored demo login auto-provisioning in auth login route
 
 ## Current Structure
 
