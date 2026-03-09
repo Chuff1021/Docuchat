@@ -77,6 +77,8 @@ export default function DocumentsPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [uploadProgress, setUploadProgress] = useState<string[]>([]);
+  const [urlBatch, setUrlBatch] = useState("");
+  const [importingUrls, setImportingUrls] = useState(false);
 
   const loadDocuments = useCallback(async () => {
     if (!organization || !accessToken) return;
@@ -155,6 +157,31 @@ export default function DocumentsPage() {
     }
   };
 
+  const handleImportUrls = async () => {
+    if (!organization || !accessToken) return;
+    const urls = urlBatch
+      .split("\n")
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    if (urls.length === 0) {
+      setUploadError("Please add at least one manual URL");
+      return;
+    }
+
+    try {
+      setImportingUrls(true);
+      setUploadError("");
+      const res = await documentsApi.importUrls(organization.id, botId, urls, accessToken);
+      setDocuments((prev) => [...res.documents, ...prev]);
+      setUrlBatch("");
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : "Failed to import manual URLs");
+    } finally {
+      setImportingUrls(false);
+    }
+  };
+
   const totalChunks = documents.reduce((sum, d) => sum + (d.chunk_count || 0), 0);
   const indexedCount = documents.filter((d) => d.status === "completed").length;
 
@@ -180,8 +207,8 @@ export default function DocumentsPage() {
             <FileText className="w-4 h-4 text-blue-400" />
             <span className="text-sm text-blue-400 font-medium">Knowledge Base</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Documents</h1>
-          <p className="text-slate-400 mt-1 text-sm">Upload PDFs to train your bot</p>
+          <h1 className="text-2xl font-bold text-white">Manual Library</h1>
+          <p className="text-slate-400 mt-1 text-sm">Upload manuals or import batch URLs to train your bot</p>
         </div>
         <button
           onClick={loadDocuments}
@@ -287,6 +314,27 @@ export default function DocumentsPage() {
         )}
       </div>
 
+      <div className="bg-slate-900 rounded-2xl border border-slate-800/60 p-5">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <h2 className="text-sm font-semibold text-slate-300">Import manual URLs</h2>
+          <button
+            onClick={handleImportUrls}
+            disabled={importingUrls}
+            className="px-3 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-lg"
+          >
+            {importingUrls ? "Importing..." : "Import URLs"}
+          </button>
+        </div>
+        <textarea
+          value={urlBatch}
+          onChange={(e) => setUrlBatch(e.target.value)}
+          rows={5}
+          placeholder={"https://manufacturer.com/manuals/model-a.pdf\nhttps://manufacturer.com/manuals/model-b.pdf"}
+          className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-xs text-slate-200 font-mono"
+        />
+        <p className="text-xs text-slate-500 mt-2">One URL per line. Imported URLs enter processing automatically.</p>
+      </div>
+
       {uploadError && (
         <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -324,6 +372,9 @@ export default function DocumentsPage() {
                     File
                   </th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
+                    Source
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
                     Status
                   </th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">
@@ -359,6 +410,11 @@ export default function DocumentsPage() {
                           </p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-xs text-slate-400">
+                        {doc.mime_type === "text/uri-list" ? "URL import" : "Upload"}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       <StatusBadge status={doc.status} />

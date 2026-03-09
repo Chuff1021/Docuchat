@@ -124,6 +124,18 @@ export const documentsApi = {
     );
   },
 
+  importUrls: (
+    orgId: string,
+    botId: string,
+    urls: string[],
+    token: string
+  ) =>
+    request<{ documents: Document[]; total: number }>(
+      `/organizations/${orgId}/bots/${botId}/documents/import-urls`,
+      { method: "POST", body: JSON.stringify({ urls }) },
+      token
+    ),
+
   delete: (orgId: string, botId: string, docId: string, token: string) =>
     request<void>(`/organizations/${orgId}/bots/${botId}/documents/${docId}`, { method: "DELETE" }, token),
 

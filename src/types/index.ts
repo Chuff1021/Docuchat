@@ -83,6 +83,7 @@ export interface Document {
   id: string;
   bot_id: string;
   organization_id: string;
+  source_type?: "upload" | "url";
   file_name: string;
   original_file_name: string;
   file_size: number | null;

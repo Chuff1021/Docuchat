@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth";
-import { botsApi } from "@/lib/api";
+import { botsApi, documentsApi } from "@/lib/api";
 import type { Bot, BotCreate } from "@/types";
 import {
   Plus,
@@ -19,9 +19,11 @@ import {
   Code2,
   Sparkles,
   X,
+  ArrowRight,
+  ArrowLeft,
 } from "lucide-react";
 
-function CreateBotModal({
+function CreateBotWizard({
   onClose,
   onCreated,
 }: {
@@ -29,6 +31,7 @@ function CreateBotModal({
   onCreated: (bot: Bot) => void;
 }) {
   const { organization, accessToken } = useAuthStore();
+  const [step, setStep] = useState(1);
   const [form, setForm] = useState<BotCreate>({
     name: "",
     greeting: "Hi! How can I help you today?",
@@ -36,16 +39,45 @@ function CreateBotModal({
     citation_mode: true,
     strict_mode: true,
   });
+  const [preset, setPreset] = useState("installation");
+  const [audience, setAudience] = useState("internal-techs");
+  const [manualUrls, setManualUrls] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const canContinue =
+    (step === 1 && !!form.name?.trim()) ||
+    (step === 2 && (files.length > 0 || manualUrls.trim().length > 0)) ||
+    step >= 3;
+
+  const nextStep = () => {
+    if (!canContinue) return;
+    setStep((prev) => Math.min(5, prev + 1));
+  };
+
+  const previousStep = () => setStep((prev) => Math.max(1, prev - 1));
+
+  const handleFinish = async () => {
     if (!organization || !accessToken) return;
     setLoading(true);
     setError("");
     try {
       const bot = await botsApi.create(organization.id, form, accessToken);
+
+      for (const file of files) {
+        await documentsApi.upload(organization.id, bot.id, file, accessToken);
+      }
+
+      const urls = manualUrls
+        .split("\n")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      if (urls.length > 0) {
+        await documentsApi.importUrls(organization.id, bot.id, urls, accessToken);
+      }
+
       onCreated(bot);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create bot");
@@ -56,16 +88,15 @@ function CreateBotModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-md">
-        {/* Header */}
+      <div className="bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl w-full max-w-3xl">
         <div className="px-6 py-5 border-b border-slate-800/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
               <Sparkles className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Create new bot</h2>
-              <p className="text-xs text-slate-400">Set up your AI chatbot in seconds</p>
+              <h2 className="text-base font-bold text-white">New Bot Wizard</h2>
+              <p className="text-xs text-slate-400">Step {step} of 5</p>
             </div>
           </div>
           <button
@@ -76,100 +107,175 @@ function CreateBotModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        <div className="px-6 py-4">
+          <div className="w-full bg-slate-800/70 rounded-full h-2 overflow-hidden">
+            <div className="bg-indigo-500 h-2 transition-all" style={{ width: `${(step / 5) * 100}%` }} />
+          </div>
+        </div>
+
+        <div className="px-6 pb-5 space-y-4 min-h-[360px]">
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
               {error}
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
-              Bot name <span className="text-indigo-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-              className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 focus:bg-slate-800 transition-colors"
-              placeholder="Support Bot"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
-              Greeting message
-            </label>
-            <input
-              type="text"
-              value={form.greeting || ""}
-              onChange={(e) => setForm({ ...form, greeting: e.target.value })}
-              className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 focus:bg-slate-800 transition-colors"
-              placeholder="Hi! How can I help you today?"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
-              Brand color
-            </label>
-            <div className="flex items-center gap-3">
-              <div className="relative">
+          {step === 1 && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Bot name</label>
                 <input
-                  type="color"
-                  value={form.brand_color || "#6366f1"}
-                  onChange={(e) => setForm({ ...form, brand_color: e.target.value })}
-                  className="w-10 h-10 rounded-xl border border-slate-700 cursor-pointer bg-transparent"
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200"
+                  placeholder="HVAC Install Assistant"
                 />
               </div>
-              <input
-                type="text"
-                value={form.brand_color || "#6366f1"}
-                onChange={(e) => setForm({ ...form, brand_color: e.target.value })}
-                className="flex-1 px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200 font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-slate-800 transition-colors"
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {(
-              [
-                { key: "citation_mode" as const, label: "Show citations", desc: "Source references" },
-                { key: "strict_mode" as const, label: "Docs-only mode", desc: "No general knowledge" },
-              ] as const
-            ).map(({ key, label, desc }) => (
-              <label
-                key={key}
-                className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                  form[key]
-                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"
-                    : "bg-slate-800/40 border-slate-700/50 text-slate-400 hover:border-slate-600"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={!!form[key]}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
-                  className="sr-only"
-                />
-                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                  form[key]
-                    ? "bg-indigo-500 border-indigo-500"
-                    : "border-slate-600"
-                }`}>
-                  {form[key] && (
-                    <CheckCircle2 className="w-3 h-3 text-white" />
-                  )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Use-case preset</label>
+                  <select
+                    value={preset}
+                    onChange={(e) => setPreset(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200"
+                  >
+                    <option value="installation">Installation Support</option>
+                    <option value="service">Service Troubleshooting</option>
+                    <option value="sales">Sales + Spec Lookup</option>
+                    <option value="custom">Custom</option>
+                  </select>
                 </div>
                 <div>
-                  <p className="text-xs font-medium">{label}</p>
-                  <p className="text-xs opacity-60">{desc}</p>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Audience</label>
+                  <select
+                    value={audience}
+                    onChange={(e) => setAudience(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200"
+                  >
+                    <option value="internal-techs">Internal Techs</option>
+                    <option value="homeowners">Homeowners</option>
+                    <option value="dealers">Dealers</option>
+                  </select>
                 </div>
-              </label>
-            ))}
-          </div>
-        </form>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Greeting message</label>
+                <input
+                  type="text"
+                  value={form.greeting || ""}
+                  onChange={(e) => setForm({ ...form, greeting: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200"
+                  placeholder="Hi! Ask me anything about venting, wiring, framing, and clearances."
+                />
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Upload manuals</label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  multiple
+                  onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+                  className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-300"
+                />
+                <p className="text-xs text-slate-500 mt-1">{files.length} file(s) selected</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Batch manual URLs</label>
+                <textarea
+                  value={manualUrls}
+                  onChange={(e) => setManualUrls(e.target.value)}
+                  rows={8}
+                  placeholder={"https://example.com/manual-1.pdf\nhttps://example.com/manual-2.pdf"}
+                  className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200 font-mono"
+                />
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <div className="grid grid-cols-2 gap-3">
+              {(
+                [
+                  { key: "citation_mode" as const, label: "Show citations", desc: "Source references" },
+                  { key: "strict_mode" as const, label: "Docs-only mode", desc: "No general knowledge" },
+                ] as const
+              ).map(({ key, label, desc }) => (
+                <label
+                  key={key}
+                  className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                    form[key]
+                      ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"
+                      : "bg-slate-800/40 border-slate-700/50 text-slate-400 hover:border-slate-600"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!!form[key]}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                    form[key]
+                      ? "bg-indigo-500 border-indigo-500"
+                      : "border-slate-600"
+                  }`}>
+                    {form[key] && <CheckCircle2 className="w-3 h-3 text-white" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium">{label}</p>
+                    <p className="text-xs opacity-60">{desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/50">
+                <p className="text-sm text-slate-300">Verification preview</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  After creation, DocuChat will ingest your manuals and run baseline checks for citation coverage.
+                </p>
+              </div>
+              <div className="text-xs text-slate-400">
+                Sources queued: {files.length} files + {manualUrls.split("\n").filter((v) => v.trim()).length} URLs
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Brand color</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={form.brand_color || "#6366f1"}
+                    onChange={(e) => setForm({ ...form, brand_color: e.target.value })}
+                    className="w-10 h-10 rounded-xl border border-slate-700 cursor-pointer bg-transparent"
+                  />
+                  <input
+                    type="text"
+                    value={form.brand_color || "#6366f1"}
+                    onChange={(e) => setForm({ ...form, brand_color: e.target.value })}
+                    className="flex-1 px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-sm text-slate-200 font-mono"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-slate-500">Click finish to create the bot and queue source ingestion.</p>
+            </div>
+          )}
+        </div>
 
         <div className="px-6 py-4 border-t border-slate-800/60 flex gap-3 justify-end">
           <button
@@ -178,20 +284,40 @@ function CreateBotModal({
           >
             Cancel
           </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !form.name}
-            className="px-5 py-2 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-40 text-white rounded-xl transition-all font-semibold shadow-lg shadow-indigo-500/20"
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating...
-              </span>
-            ) : (
-              "Create bot"
-            )}
-          </button>
+          {step > 1 && (
+            <button
+              onClick={previousStep}
+              className="px-4 py-2 text-sm text-slate-300 border border-slate-700 rounded-xl hover:bg-slate-800 transition-colors inline-flex items-center gap-1"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back
+            </button>
+          )}
+          {step < 5 ? (
+            <button
+              onClick={nextStep}
+              disabled={!canContinue}
+              className="px-5 py-2 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-40 text-white rounded-xl transition-all font-semibold inline-flex items-center gap-1"
+            >
+              Next
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={handleFinish}
+              disabled={loading || !form.name?.trim()}
+              className="px-5 py-2 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-40 text-white rounded-xl transition-all font-semibold shadow-lg shadow-indigo-500/20"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Creating...
+                </span>
+              ) : (
+                "Finish & create bot"
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -410,7 +536,7 @@ export default function BotsPage() {
       )}
 
       {showCreate && (
-        <CreateBotModal
+        <CreateBotWizard
           onClose={() => setShowCreate(false)}
           onCreated={(bot) => {
             setBots((prev) => [bot, ...prev]);
