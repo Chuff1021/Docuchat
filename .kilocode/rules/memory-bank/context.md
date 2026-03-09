@@ -2,9 +2,9 @@
 
 ## Current State
 
-**Project Status**: ✅ Fully functional demo preview (rebranded to DocuBot)
+**Project Status**: ✅ Phase 1 backend operational (real API + persistence)
 
-DocuBot is an AI-powered business chatbot platform. Upload your docs, get an AI expert that answers questions for your team and customers — with citations, on the first try. The frontend is fully built with mock data, so the entire app works in the browser without a backend API.
+DocuBot is an AI-powered business chatbot platform. The frontend now talks to real Next.js API routes backed by a persistent Drizzle schema (SQLite dialect) instead of in-memory mock APIs. Authentication/session, organization-scoped bot/document/chat APIs, widget tokens, and dashboard overview are now persisted.
 
 ## Recently Completed
 
@@ -31,6 +31,14 @@ DocuBot is an AI-powered business chatbot platform. Upload your docs, get an AI 
 - [x] Updated all branding: nav, footer, auth pages, dashboard sidebar, embed snippets, mock data, auth store
 - [x] **Updated all OpenAI model references**: gpt-4o → gpt-4.1, gpt-4o-mini → gpt-4.1-mini (10 files, 25 references)
 - [x] Updated landing page banner text
+- [x] Created operational planning docs for ChatGPT OAuth stack (`plans/full-operational-build-plan.md`, `plans/knowledge-engine-spec.md`, `plans/implementation-checklist.md`)
+- [x] Added Drizzle database setup (`drizzle.config.ts`, `src/db/schema.ts`, `src/db/index.ts`, `src/db/migrate.ts`)
+- [x] Generated initial DB migration (`src/db/migrations/0000_cold_hellcat.sql`)
+- [x] Implemented real auth/session API (`/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/me`, `/api/v1/auth/organizations`)
+- [x] Implemented organization-scoped APIs for bots/documents/chats/widget tokens/analytics under `/api/v1/organizations/*`
+- [x] Added env validation (`src/lib/env.ts`, `src/lib/env-client.ts`)
+- [x] Replaced mock frontend API client with real fetch client (`src/lib/api.ts`)
+- [x] Disabled demo auto-login in auth store (`src/store/auth.ts`)
 
 ## Current Structure
 
@@ -45,8 +53,12 @@ DocuBot is an AI-powered business chatbot platform. Upload your docs, get an AI 
 | `src/app/error.tsx` | Error boundary | ✅ Rebranded |
 | `src/app/not-found.tsx` | 404 page | ✅ Rebranded |
 | `src/lib/api.ts` | Mock API client (no backend needed) | ✅ Rebranded |
+| `src/lib/api.ts` | Real API client (fetch to `/api/v1`) | ✅ Updated |
 | `src/lib/mock-data.ts` | Demo data (users, bots, docs, analytics) | ✅ Rebranded |
-| `src/store/auth.ts` | Zustand auth store (auto-login) | ✅ Rebranded |
+| `src/store/auth.ts` | Zustand auth store (real session tokens) | ✅ Updated |
+| `src/app/api/v1/` | Backend API routes for auth/org/bots/docs/chat | ✅ NEW |
+| `src/db/` | Drizzle schema + migrations | ✅ NEW |
+| `src/server/` | Server auth/serialization helpers | ✅ NEW |
 | `src/types/index.ts` | TypeScript interfaces | ✅ Ready |
 | `plans/brain-engine-architecture.md` | Full brain/engine architecture plan | ✅ NEW |
 | `plans/backend-architecture.md` | Backend architecture plan | ✅ Ready |
@@ -90,8 +102,8 @@ A comprehensive brain/engine architecture plan has been created covering:
 
 ## Pending Improvements
 
-- [ ] Wire up real backend (FastAPI in manualbot/apps/api/)
-- [ ] Implement OAuth flow (per plans/chatgpt-oauth-auth.md)
+- [x] Wire up real backend APIs in Next.js App Router (`/api/v1`)
+- [ ] Implement full ChatGPT OAuth initiation/callback/linking flow (currently schema + token fields are ready)
 - [ ] Build the brain/engine (per plans/brain-engine-architecture.md)
 - [ ] Add authentication flow with real API
 - [ ] Add more recipes (auth, email, etc.)
@@ -110,3 +122,4 @@ A comprehensive brain/engine architecture plan has been created covering:
 | 2026-03-08 | **REBRAND: ManualBot → DocuBot** — updated all branding, redesigned landing page, created comprehensive brain/engine architecture plan |
 | 2026-03-08 | **Updated all OpenAI model references** — gpt-4o → gpt-4.1, gpt-4o-mini → gpt-4.1-mini across 10 files (plans, frontend, backend config) |
 | 2026-03-09 | Updated landing page banner text to reflect Kilo Agent generation |
+| 2026-03-09 | Added planning docs for full operational ChatGPT OAuth stack and implemented Phase 1: real auth/session, persistent DB + migrations, org-scoped bots/documents/chat APIs, env validation, and frontend API wiring |

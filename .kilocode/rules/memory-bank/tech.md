@@ -9,6 +9,9 @@
 | TypeScript   | 5.9.x   | Type-safe JavaScript            |
 | Tailwind CSS | 4.x     | Utility-first CSS               |
 | Bun          | Latest  | Package manager & runtime       |
+| Drizzle ORM  | 0.45.x  | Database schema + query layer   |
+| App Builder DB | main   | Managed DB connection/migrations |
+| Zod          | 4.x     | Environment validation          |
 
 ## Development Environment
 
@@ -57,9 +60,12 @@ bun typecheck      # Run TypeScript type checking
 
 ```json
 {
+  "@kilocode/app-builder-db": "github:Kilo-Org/app-builder-db#main",
+  "drizzle-orm": "^0.45.1",
   "next": "^16.1.3", // Framework
   "react": "^19.2.3", // UI library
-  "react-dom": "^19.2.3" // React DOM
+  "react-dom": "^19.2.3", // React DOM
+  "zod": "^4.3.6" // Runtime validation
 }
 ```
 
@@ -67,6 +73,8 @@ bun typecheck      # Run TypeScript type checking
 
 ```json
 {
+  "drizzle-kit": "^0.31.9",
+  "tsx": "^4.20.6",
   "typescript": "^5.9.3",
   "@types/node": "^24.10.2",
   "@types/react": "^19.2.7",
@@ -139,5 +147,7 @@ bun typecheck      # Run TypeScript type checking
 ### Environment Variables
 
 - None required for base template
-- Add as needed for features
+- Current backend requires `DB_URL` (`DB_TOKEN` optional)
+- OAuth stack settings: `CHATGPT_OAUTH_CLIENT_ID`, `CHATGPT_OAUTH_CLIENT_SECRET`, `CHATGPT_OAUTH_REDIRECT_URI`
+- Optional overrides: `CHATGPT_OAUTH_AUTHORIZE_URL`, `CHATGPT_OAUTH_TOKEN_URL`, `CHATGPT_OAUTH_USERINFO_URL`, `OPENAI_API_BASE_URL`
 - Use `.env.local` for local development

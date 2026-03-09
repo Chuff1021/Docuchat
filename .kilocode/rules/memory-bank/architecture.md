@@ -9,10 +9,9 @@ src/
 │   ├── page.tsx            # Home page
 │   ├── globals.css         # Tailwind imports + global styles
 │   └── favicon.ico         # Site icon
-└── (expand as needed)
-    ├── components/         # React components (add when needed)
-    ├── lib/                # Utilities and helpers (add when needed)
-    └── db/                 # Database files (add via recipe)
+├── db/                     # Drizzle schema + migrations + db client
+├── server/                 # Server-side auth/serialization helpers
+└── lib/                    # Shared utilities + API client + env validation
 ```
 
 ## Key Design Patterns
@@ -81,6 +80,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 ```
+
+### 5. API Route Pattern (Current Backend)
+
+The app now includes organization-scoped REST endpoints under `src/app/api/v1/`:
+
+```
+src/app/api/v1/
+├── auth/
+│   ├── login/route.ts
+│   ├── register/route.ts
+│   ├── me/route.ts
+│   └── organizations/route.ts
+└── organizations/[orgId]/
+    ├── bots/...
+    └── analytics/overview/route.ts
+```
+
+Pattern conventions:
+- Validate bearer token and org membership first
+- Return `NextResponse.json({ error: "..." }, { status })` on failures
+- Serialize DB rows into frontend contract types in `src/server/serializers.ts`
 
 ## Styling Conventions
 
