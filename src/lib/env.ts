@@ -1,13 +1,16 @@
 import { z } from "zod";
 
-// Deploy-safe fallback for all environments when DB_URL is not set.
+// Deploy-safe fallback for all environments when DB config is not set.
 if (!process.env.DB_URL) {
   process.env.DB_URL = "file:./.tmp-docuchat-preview.db";
+}
+if (!process.env.DB_TOKEN) {
+  process.env.DB_TOKEN = "docuchat-preview-token";
 }
 
 const serverEnvSchema = z.object({
   DB_URL: z.string().min(1).default("file:./.tmp-docuchat-preview.db"),
-  DB_TOKEN: z.string().optional(),
+  DB_TOKEN: z.string().min(1).default("docuchat-preview-token"),
   CHATGPT_OAUTH_CLIENT_ID: z.string().optional(),
   CHATGPT_OAUTH_CLIENT_SECRET: z.string().optional(),
   CHATGPT_OAUTH_REDIRECT_URI: z.string().url().optional(),
