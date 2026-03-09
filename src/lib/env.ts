@@ -1,7 +1,16 @@
 import { z } from "zod";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+// Deploy-safe fallback for preview/dev environments where DB_URL is not set yet.
+if (!process.env.DB_URL && !isProduction) {
+  process.env.DB_URL = "file:./.tmp-docuchat-preview.db";
+}
+
 const serverEnvSchema = z.object({
-  DB_URL: z.string().min(1, "DB_URL is required"),
+  DB_URL: isProduction
+    ? z.string().min(1, "DB_URL is required")
+    : z.string().min(1).default("file:./.tmp-docuchat-preview.db"),
   DB_TOKEN: z.string().optional(),
   CHATGPT_OAUTH_CLIENT_ID: z.string().optional(),
   CHATGPT_OAUTH_CLIENT_SECRET: z.string().optional(),
