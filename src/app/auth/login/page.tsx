@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authApi } from "@/lib/api";
@@ -15,6 +15,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get("oauth_error");
+    if (oauthError) {
+      setError("OpenAI OAuth failed. Please try again.");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +46,18 @@ export default function LoginPage() {
   const fillDemo = () => {
     setEmail("demo@docubot.ai");
     setPassword("demo1234");
+  };
+
+  const handleOpenAiSignIn = async () => {
+    setError("");
+    setOauthLoading(true);
+    try {
+      const res = await authApi.oauthOpenAIUrl("login");
+      window.location.href = res.authorize_url;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to start OpenAI OAuth");
+      setOauthLoading(false);
+    }
   };
 
   return (
@@ -62,6 +83,28 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-slate-900 rounded-2xl border border-slate-800/60 shadow-2xl p-8">
+          <button
+            type="button"
+            onClick={handleOpenAiSignIn}
+            disabled={oauthLoading}
+            className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-lg shadow-emerald-500/20"
+          >
+            {oauthLoading ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                Sign in with ChatGPT
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+
+          <div className="my-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-800" />
+            <span className="text-xs text-slate-500">or continue with email</span>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">

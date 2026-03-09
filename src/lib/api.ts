@@ -7,6 +7,8 @@ import type {
   ChatResponse,
   Document,
   IngestionJob,
+  OAuthAuthorizeResponse,
+  OAuthStatus,
   Organization,
   TokenResponse,
   User,
@@ -61,6 +63,24 @@ export const authApi = {
   me: (token: string) => request<User>("/auth/me", {}, token),
 
   myOrganizations: (token: string) => request<Organization[]>("/auth/organizations", {}, token),
+
+  oauthOpenAIUrl: (intent: "login" | "link", token?: string) =>
+    request<OAuthAuthorizeResponse>(`/auth/oauth/openai?intent=${intent}`, {}, token),
+
+  oauthOpenAIStatus: (token: string) => request<OAuthStatus>("/auth/oauth/openai/status", {}, token),
+
+  unlinkOpenAI: (token: string) => request<{ success: boolean }>("/auth/oauth/openai/unlink", { method: "DELETE" }, token),
+
+  oauthFinalizeSession: async (accessToken: string, refreshToken: string): Promise<TokenResponse> => {
+    const user = await request<User>("/auth/me", {}, accessToken);
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      token_type: "bearer",
+      expires_in: 3600,
+      user,
+    };
+  },
 };
 
 export const botsApi = {

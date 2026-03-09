@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth";
-import { botsApi } from "@/lib/api";
+import { authApi, botsApi } from "@/lib/api";
 import type { Bot } from "@/types";
 import {
   ChevronRight,
@@ -103,6 +103,9 @@ export default function BotSettingsPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState<Partial<Bot>>({});
   const [activeTab, setActiveTab] = useState<Tab>("basic");
+  const [oauthConnected, setOauthConnected] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+  const [oauthExpiresAt, setOauthExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
     if (!organization || !accessToken) return;
@@ -115,6 +118,20 @@ export default function BotSettingsPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [organization, accessToken, botId]);
+
+  useEffect(() => {
+    if (!accessToken) return;
+    authApi
+      .oauthOpenAIStatus(accessToken)
+      .then((status) => {
+        setOauthConnected(status.connected);
+        setOauthExpiresAt(status.expires_at);
+      })
+      .catch(() => {
+        setOauthConnected(false);
+        setOauthExpiresAt(null);
+      });
+  }, [accessToken]);
 
   const handleSave = async () => {
     if (!organization || !accessToken) return;
@@ -139,6 +156,34 @@ export default function BotSettingsPage() {
 
   const update = (key: keyof Bot, value: unknown) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const connectOpenAi = async () => {
+    if (!accessToken) return;
+    setOauthLoading(true);
+    setError("");
+    try {
+      const res = await authApi.oauthOpenAIUrl("link", accessToken);
+      window.location.href = res.authorize_url;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to start OpenAI OAuth linking");
+      setOauthLoading(false);
+    }
+  };
+
+  const disconnectOpenAi = async () => {
+    if (!accessToken) return;
+    setOauthLoading(true);
+    setError("");
+    try {
+      await authApi.unlinkOpenAI(accessToken);
+      setOauthConnected(false);
+      setOauthExpiresAt(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to disconnect OpenAI account");
+    } finally {
+      setOauthLoading(false);
+    }
   };
 
   if (loading) {
@@ -351,6 +396,44 @@ export default function BotSettingsPage() {
               <p className="text-xs text-slate-500">
                 <span className="text-slate-400 font-medium">Embeddings:</span> text-embedding-3-small
               </p>
+            </div>
+
+            <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
+              <p className="text-sm text-slate-200 font-medium mb-1">Connected AI Account</p>
+              <p className="text-xs text-slate-500 mb-3">
+                Connect your OpenAI account to use your own API access for chat responses.
+              </p>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className={`text-xs font-medium ${oauthConnected ? "text-emerald-400" : "text-slate-400"}`}>
+                    {oauthConnected ? "OpenAI connected" : "OpenAI not connected"}
+                  </p>
+                  {oauthConnected && oauthExpiresAt && (
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Token expires {new Date(oauthExpiresAt).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+                {oauthConnected ? (
+                  <button
+                    type="button"
+                    onClick={disconnectOpenAi}
+                    disabled={oauthLoading}
+                    className="px-3 py-2 rounded-lg border border-red-500/30 text-red-400 text-xs font-medium hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    Disconnect
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={connectOpenAi}
+                    disabled={oauthLoading}
+                    className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-500 disabled:opacity-50"
+                  >
+                    Connect OpenAI
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}

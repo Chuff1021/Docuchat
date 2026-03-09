@@ -39,6 +39,9 @@ DocuBot is an AI-powered business chatbot platform. The frontend now talks to re
 - [x] Added env validation (`src/lib/env.ts`, `src/lib/env-client.ts`)
 - [x] Replaced mock frontend API client with real fetch client (`src/lib/api.ts`)
 - [x] Disabled demo auto-login in auth store (`src/store/auth.ts`)
+- [x] Implemented ChatGPT OAuth flow end-to-end: initiate (`/api/v1/auth/oauth/openai`), callback (`/api/v1/auth/oauth/openai/callback`), status (`/api/v1/auth/oauth/openai/status`), unlink (`/api/v1/auth/oauth/openai/unlink`)
+- [x] Added OAuth server utility module for authorize URL, state encoding/decoding, token exchange, and OpenAI profile fetch (`src/server/oauth.ts`)
+- [x] Added frontend OAuth UX: "Sign in with ChatGPT" on login, OAuth session finalizer route/page (`/auth/oauth/callback`), and OpenAI connect/disconnect controls in bot AI settings
 
 ## Current Structure
 
@@ -103,7 +106,7 @@ A comprehensive brain/engine architecture plan has been created covering:
 ## Pending Improvements
 
 - [x] Wire up real backend APIs in Next.js App Router (`/api/v1`)
-- [ ] Implement full ChatGPT OAuth initiation/callback/linking flow (currently schema + token fields are ready)
+- [x] Implement full ChatGPT OAuth initiation/callback/linking flow (currently schema + token fields are ready)
 - [ ] Build the brain/engine (per plans/brain-engine-architecture.md)
 - [ ] Add authentication flow with real API
 - [ ] Add more recipes (auth, email, etc.)
@@ -123,3 +126,4 @@ A comprehensive brain/engine architecture plan has been created covering:
 | 2026-03-08 | **Updated all OpenAI model references** — gpt-4o → gpt-4.1, gpt-4o-mini → gpt-4.1-mini across 10 files (plans, frontend, backend config) |
 | 2026-03-09 | Updated landing page banner text to reflect Kilo Agent generation |
 | 2026-03-09 | Added planning docs for full operational ChatGPT OAuth stack and implemented Phase 1: real auth/session, persistent DB + migrations, org-scoped bots/documents/chat APIs, env validation, and frontend API wiring |
+| 2026-03-09 | Implemented full OpenAI OAuth linking/auth flow in Next.js APIs + frontend login/settings UX, including callback session finalization and connection status/unlink endpoints |

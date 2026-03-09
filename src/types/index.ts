@@ -29,6 +29,16 @@ export interface TokenResponse {
   user: User;
 }
 
+export interface OAuthAuthorizeResponse {
+  authorize_url: string;
+}
+
+export interface OAuthStatus {
+  connected: boolean;
+  provider: "openai" | null;
+  expires_at: string | null;
+}
+
 export interface Bot {
   id: string;
   organization_id: string;
