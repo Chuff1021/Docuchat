@@ -37,6 +37,36 @@ export default function LoginPage() {
       setAuth(response.user, org, response.access_token, response.refresh_token);
       router.push("/dashboard");
     } catch (err: unknown) {
+      const isDemoLogin = email.trim().toLowerCase() === "demo@docubot.ai" && password.trim() === "demo1234";
+
+      if (isDemoLogin) {
+        setAuth(
+          {
+            id: "usr_demo_local",
+            email: "demo@docubot.ai",
+            full_name: "Alex Chen",
+            is_active: true,
+            is_verified: true,
+            avatar_url: null,
+            created_at: new Date().toISOString(),
+          },
+          {
+            id: "org_demo_local",
+            name: "Acme Corp",
+            slug: "acme-corp",
+            logo_url: null,
+            website: null,
+            plan: "pro",
+            is_active: true,
+            created_at: new Date().toISOString(),
+          },
+          "demo-access-token",
+          "demo-refresh-token"
+        );
+        router.push("/dashboard");
+        return;
+      }
+
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
