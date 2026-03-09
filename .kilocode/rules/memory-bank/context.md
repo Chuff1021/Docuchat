@@ -30,6 +30,7 @@ DocuBot is an AI-powered business chatbot platform. Upload your docs, get an AI 
 - [x] **Redesigned landing page** — cleaner layout, proper feature grid, engine diagram section, fixed graphics
 - [x] Updated all branding: nav, footer, auth pages, dashboard sidebar, embed snippets, mock data, auth store
 - [x] **Updated all OpenAI model references**: gpt-4o → gpt-4.1, gpt-4o-mini → gpt-4.1-mini (10 files, 25 references)
+- [x] Updated landing page banner text
 
 ## Current Structure
 
@@ -108,3 +109,4 @@ A comprehensive brain/engine architecture plan has been created covering:
 | 2026-03-08 | Added backend architecture plan and ChatGPT OAuth auth plan |
 | 2026-03-08 | **REBRAND: ManualBot → DocuBot** — updated all branding, redesigned landing page, created comprehensive brain/engine architecture plan |
 | 2026-03-08 | **Updated all OpenAI model references** — gpt-4o → gpt-4.1, gpt-4o-mini → gpt-4.1-mini across 10 files (plans, frontend, backend config) |
+| 2026-03-09 | Updated landing page banner text to reflect Kilo Agent generation |
